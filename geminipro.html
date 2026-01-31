@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebOS Desktop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --text-color: #ffffff;
+            --accent-color: rgba(255, 255, 255, 0.3);
+            --taskbar-height: 50px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+            background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+        }
+
+        #desktop {
+            width: 100%;
+            height: calc(100vh - var(--taskbar-height));
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 20px;
+            position: relative;
+        }
+
+        .desktop-icon {
+            width: 80px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .desktop-icon:hover {
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+        }
+
+        .desktop-icon i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .desktop-icon.calc-icon i { color: #ff9f43; }
+        .desktop-icon.notepad-icon i { color: #54a0ff; }
+        .desktop-icon.files-icon i { color: #feca57; }
+
+        .desktop-icon span {
+            font-size: 13px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .window {
+            position: absolute;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            min-height: 200px;
+            overflow: hidden;
+            transition: transform 0.1s, opacity 0.2s;
+            resize: both;
+        }
+
+        .window.minimized {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8) translateY(200px);
+        }
+
+        .window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100vh - var(--taskbar-height)) !important;
+            border-radius: 0;
+        }
+
+        .window-header {
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            cursor: default;
+        }
+
+        .window-title {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+
+        .close-btn { background: #ff5f56; }
+        .min-btn { background: #ffbd2e; }
+        .max-btn { background: #27c93f; }
+
+        .window-content {
+            flex: 1;
+            padding: 0;
+            overflow: auto;
+            position: relative;
+            color: #fff;
+        }
+
+        textarea.notepad-area {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            resize: none;
+            outline: none;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            padding: 10px;
+            height: 100%;
+        }
+
+        .calc-display {
+            grid-column: span 4;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            padding: 15px;
+            text-align: right;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .calc-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .calc-btn:hover { background: rgba(255,255,255,0.2); }
+        .calc-btn.operator { background: rgba(254, 202, 87, 0.3); }
+        .calc-btn.equals { background: rgba(39, 201, 63, 0.5); }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .file-item:hover { background: rgba(255,255,255,0.1); }
+        .file-item i { font-size: 32px; margin-bottom: 5px; color: #feca57; }
+        .file-item span { font-size: 12px; text-align: center; word-break: break-all; }
+
+        #taskbar {
+            height: var(--taskbar-height);
+            width: 100%;
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: fixed;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 9999;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .start-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .start-btn:hover { background: rgba(255,255,255,0.1); }
+        .start-btn i { font-size: 20px; color: #00d2d3; }
+
+        .taskbar-apps {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .task-icon:hover { background: rgba(255,255,255,0.1); }
+        .task-icon.active { background: rgba(255,255,255,0.15); }
+        
+        .task-icon::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 0;
+            height: 3px;
+            background: var(--text-color);
+            border-radius: 2px;
+            transition: width 0.2s;
+        }
+
+        .task-icon.active::after { width: 15px; }
+
+        .system-tray {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .system-tray:hover { background: rgba(255,255,255,0.1); }
+
+        #start-menu {
+            position: fixed;
+            bottom: 60px;
+            left: 10px;
+            width: 300px;
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--glass-border);
+            display: none;
+            z-index: 10000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            animation: slideUp 0.2s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #start-menu h3 { margin-top: 0; margin-bottom: 15px; }
+        
+        .start-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .start-item:hover { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+
+    <div id="desktop">
+        <div class="desktop-icon notepad-icon" onclick="openApp('notepad')">
+            <i class="fas fa-sticky-note"></i>
+            <span>Notepad</span>
+        </div>
+        <div class="desktop-icon calc-icon" onclick="openApp('calculator')">
+            <i class="fas fa-calculator"></i>
+            <span>Calcolatrice</span>
+        </div>
+        <div class="desktop-icon files-icon" onclick="openApp('explorer')">
+            <i class="fas fa-folder-open"></i>
+            <span>Files</span>
+        </div>
+    </div>
+
+    <div id="start-menu">
+        <h3>Menu Start</h3>
+        <div class="start-item" onclick="openApp('notepad'); toggleStartMenu()">
+            <i class="fas fa-sticky-note" style="color: #54a0ff;"></i> Notepad
+        </div>
+        <div class="start-item" onclick="openApp('calculator'); toggleStartMenu()">
+            <i class="fas fa-calculator" style="color: #ff9f43;"></i> Calcolatrice
+        </div>
+        <div class="start-item" onclick="openApp('explorer'); toggleStartMenu()">
+            <i class="fas fa-folder-open" style="color: #feca57;"></i> File Explorer
+        </div>
+    </div>
+
+    <div id="taskbar">
+        <div class="start-btn" onclick="toggleStartMenu()">
+            <i class="fab fa-windows"></i>
+        </div>
+        <div class="taskbar-apps" id="taskbar-apps"></div>
+        <div class="system-tray">
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-volume-up"></i>
+            <span id="clock">00:00</span>
+        </div>
+    </div>
+
+    <script>
+        let highestZ = 100;
+        let openApps = {};
+
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const date = now.toLocaleDateString();
+            document.getElementById('clock').innerText = `${time}\n${date}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('start-menu');
+            const startBtn = document.querySelector('.start-btn');
+            if (menu.style.display === 'block' && !menu.contains(e.target) && !startBtn.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        const apps = {
+            notepad: {
+                title: 'Notepad',
+                icon: 'fa-sticky-note',
+                content: `<textarea class="notepad-area" placeholder="Scrivi qui..."></textarea>`
+            },
+            calculator: {
+                title: 'Calcolatrice',
+                icon: 'fa-calculator',
+                content: `
+                    <div class="calc-grid">
+                        <div class="calc-display" id="calc-disp">0</div>
+                        <button class="calc-btn" onclick="calcInput('C')">C</button>
+                        <button class="calc-btn" onclick="calcInput('/')">/</button>
+                        <button class="calc-btn" onclick="calcInput('*')">*</button>
+                        <button class="calc-btn" onclick="calcInput('del')">←</button>
+                        <button class="calc-btn" onclick="calcInput('7')">7</button>
+                        <button class="calc-btn" onclick="calcInput('8')">8</button>
+                        <button class="calc-btn" onclick="calcInput('9')">9</button>
+                        <button class="calc-btn operator" onclick="calcInput('-')">-</button>
+                        <button class="calc-btn" onclick="calcInput('4')">4</button>
+                        <button class="calc-btn" onclick="calcInput('5')">5</button>
+                        <button class="calc-btn" onclick="calcInput('6')">6</button>
+                        <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+                        <button class="calc-btn" onclick="calcInput('1')">1</button>
+                        <button class="calc-btn" onclick="calcInput('2')">2</button>
+                        <button class="calc-btn" onclick="calcInput('3')">3</button>
+                        <button class="calc-btn equals" style="grid-row: span 2;" onclick="calcInput('=')">=</button>
+                        <button class="calc-btn" style="grid-column: span 2;" onclick="calcInput('0')">0</button>
+                        <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    </div>
+                `
+            },
+            explorer: {
+                title: 'File Explorer',
+                icon: 'fa-folder-open',
+                content: `
+                    <div class="file-grid">
+                        <div class="file-item"><i class="fas fa-folder"></i><span>Documenti</span></div>
+                        <div class="file-item"><i class="fas fa-folder"></i><span>Immagini</span></div>
+                        <div class="file-item"><i class="fas fa-folder"></i><span>Download</span></div>
+                        <div class="file-item"><i class="fas fa-file-code"></i><span>Progetto.js</span></div>
+                        <div class="file-item"><i class="fas fa-file-image"></i><span>Vacanza.jpg</span></div>
+                        <div class="file-item"><i class="fas fa-file-pdf"></i><span>CV.pdf</span></div>
+                    </div>
+                `
+            }
+        };
+
+        let currentCalc = '';
+
+        function calcInput(val) {
+            const display = document.querySelector('.window.active #calc-disp') || document.querySelector('.window:last-child #calc-disp');
+            if(!display) return;
+
+            if (val === 'C') {
+                currentCalc = '';
+                display.innerText = '0';
+            } else if (val === '=') {
+                try {
+                    currentCalc = eval(currentCalc).toString();
+                    display.innerText = currentCalc;
+                } catch {
+                    display.innerText = 'Error';
+                    currentCalc = '';
+                }
+            } else if (val === 'del') {
+                currentCalc = currentCalc.slice(0, -1);
+                display.innerText = currentCalc || '0';
+            } else {
+                currentCalc += val;
+                display.innerText = currentCalc;
+            }
+        }
+
+        function openApp(appId) {
+            if (openApps[appId]) {
+                focusWindow(openApps[appId]);
+                if (openApps[appId].classList.contains('minimized')) {
+                    toggleMinimize(appId);
+                }
+                return;
+            }
+
+            const appData = apps[appId];
+            const win = document.createElement('div');
+            win.className = 'window active';
+            win.id = `win-${appId}`;
+            win.style.zIndex = ++highestZ;
+            win.style.left = '50px';
+            win.style.top = '50px';
+            win.style.width = appId === 'calculator' ? '320px' : '500px';
+            win.style.height = appId === 'calculator' ? '450px' : '350px';
+
+            win.innerHTML = `
+                <div class="window-header" onmousedown="dragStart(event, '${appId}')">
+                    <div class="window-title"><i class="fas ${appData.icon}"></i> ${appData.title}</div>
+                    <div class="window-controls">
+                        <button class="control-btn min-btn" onclick="toggleMinimize('${appId}')"></button>
+                        <button class="control-btn max-btn" onclick="toggleMaximize('${appId}')"></button>
+                        <button class="control-btn close-btn" onclick="closeApp('${appId}')"></button>
+                    </div>
+                </div>
+                <div class="window-content" onclick="focusWindow(document.getElementById('win-${appId}'))">
+                    ${appData.content}
+                </div>
+            `;
+
+            document.body.appendChild(win);
+            openApps[appId] = win;
+            addToTaskbar(appId);
+            focusWindow(win);
+        }
+
+        function closeApp(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (win) win.remove();
+            delete openApps[appId];
+            
+            const taskIcon = document.getElementById(`task-${appId}`);
+            if (taskIcon) taskIcon.remove();
+        }
+
+        function addToTaskbar(appId) {
+            const taskbar = document.getElementById('taskbar-apps');
+            const icon = document.createElement('div');
+            icon.className = 'task-icon active';
+            icon.id = `task-${appId}`;
+            icon.innerHTML = `<i class="fas ${apps[appId].icon}"></i>`;
+            icon.onclick = () => {
+                const win = openApps[appId];
+                if (win.classList.contains('minimized')) {
+                    toggleMinimize(appId);
+                } else {
+                    if (win.style.zIndex < highestZ) {
+                        focusWindow(win);
+                    } else {
+                        toggleMinimize(appId);
+                    }
+                }
+            };
+            taskbar.appendChild(icon);
+        }
+
+        function focusWindow(win) {
+            if (!win) return;
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            document.querySelectorAll('.task-icon').forEach(t => t.classList.remove('active'));
+            
+            win.style.zIndex = ++highestZ;
+            win.classList.add('active');
+            
+            const appId = win.id.replace('win-', '');
+            const taskIcon = document.getElementById(`task-${appId}`);
+            if (taskIcon) taskIcon.classList.add('active');
+        }
+
+        function toggleMinimize(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            const taskIcon = document.getElementById(`task-${appId}`);
+            win.classList.toggle('minimized');
+            if (win.classList.contains('minimized')) {
+                win.classList.remove('active');
+                taskIcon.classList.remove('active');
+            } else {
+                focusWindow(win);
+            }
+        }
+
+        function toggleMaximize(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            win.classList.toggle('maximized');
+            focusWindow(win);
+        }
+
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let currentWindow = null;
+
+        function dragStart(e, appId) {
+            if (e.target.closest('.window-controls')) return;
+            
+            const win = document.getElementById(`win-${appId}`);
+            if (win.classList.contains('maximized')) return;
+
+            focusWindow(win);
+            isDragging = true;
+            currentWindow = win;
+            dragOffset.x = e.clientX - win.offsetLeft;
+            dragOffset.y = e.clientY - win.offsetTop;
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || !currentWindow) return;
+            e.preventDefault();
+            
+            let newX = e.clientX - dragOffset.x;
+            let newY = e.clientY - dragOffset.y;
+            
+            if (newY < 0) newY = 0;
+            if (newY > window.innerHeight - 50) newY = window.innerHeight - 50;
+            
+            currentWindow.style.left = `${newX}px`;
+            currentWindow.style.top = `${newY}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            currentWindow = null;
+        });
+
+    </script>
+</body>
+</html>

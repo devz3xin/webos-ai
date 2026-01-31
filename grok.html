@@ -1,0 +1,190 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const desktop = document.getElementById('desktop');
+    const taskbar = document.getElementById('taskbar');
+    const openApps = document.getElementById('open-apps');
+    const clock = document.getElementById('clock');
+    const startButton = document.getElementById('start');
+    const startMenu = document.getElementById('start-menu');
+
+    let zIndexCounter = 1000;
+    let windows = {};
+    let appIcons = {};
+
+    function updateClock() {
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    startButton.addEventListener('click', () => {
+        startMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
+            startMenu.classList.add('hidden');
+        }
+    });
+
+    const icons = document.querySelectorAll('.icon, .menu-item');
+    icons.forEach(icon => {
+        icon.addEventListener('click', () => {
+            const app = icon.dataset.app;
+            openApp(app);
+            startMenu.classList.add('hidden');
+        });
+    });
+
+    function openApp(app) {
+        if (windows[app] && !windows[app].classList.contains('minimized')) {
+            bringToFront(windows[app]);
+            return;
+        }
+        const win = createWindow(app);
+        windows[app] = win;
+        desktop.appendChild(win);
+        bringToFront(win);
+        if (!appIcons[app]) {
+            const appIcon = document.createElement('div');
+            appIcon.classList.add('app-icon');
+            appIcon.textContent = app.charAt(0).toUpperCase();
+            appIcon.dataset.app = app;
+            appIcon.addEventListener('click', () => {
+                if (windows[app].classList.contains('minimized')) {
+                    windows[app].classList.remove('minimized');
+                } else {
+                    bringToFront(windows[app]);
+                }
+            });
+            openApps.appendChild(appIcon);
+            appIcons[app] = appIcon;
+        }
+    }
+
+    function createWindow(app) {
+        const win = document.createElement('div');
+        win.classList.add('window');
+        win.style.top = `${Math.random() * 200 + 50}px`;
+        win.style.left = `${Math.random() * 200 + 50}px`;
+        win.dataset.app = app;
+
+        const titlebar = document.createElement('div');
+        titlebar.classList.add('titlebar');
+        titlebar.textContent = app.charAt(0).toUpperCase() + app.slice(1);
+
+        const controls = document.createElement('div');
+        controls.classList.add('controls');
+
+        const minBtn = document.createElement('button');
+        minBtn.textContent = '-';
+        minBtn.addEventListener('click', () => minimize(win));
+
+        const maxBtn = document.createElement('button');
+        maxBtn.textContent = '□';
+        maxBtn.addEventListener('click', () => maximize(win));
+
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'X';
+        closeBtn.addEventListener('click', () => close(win));
+
+        controls.appendChild(minBtn);
+        controls.appendChild(maxBtn);
+        controls.appendChild(closeBtn);
+
+        titlebar.appendChild(controls);
+        win.appendChild(titlebar);
+
+        const content = document.createElement('div');
+        content.classList.add('content');
+
+        if (app === 'notepad') {
+            const textarea = document.createElement('textarea');
+            content.appendChild(textarea);
+        } else if (app === 'calculator') {
+            content.classList.add('calculator');
+            const display = document.createElement('input');
+            display.type = 'text';
+            display.readOnly = true;
+            content.appendChild(display);
+
+            const buttons = ['7','8','9','/','4','5','6','*','1','2','3','-','0','.','=','+','C'];
+            buttons.forEach(btn => {
+                const button = document.createElement('button');
+                button.textContent = btn;
+                button.addEventListener('click', () => handleCalc(btn, display));
+                content.appendChild(button);
+            });
+        } else if (app === 'explorer') {
+            content.classList.add('explorer');
+            for (let i = 1; i <= 6; i++) {
+                const folder = document.createElement('div');
+                folder.classList.add('folder');
+                folder.textContent = `Cartella ${i}`;
+                content.appendChild(folder);
+            }
+        }
+
+        win.appendChild(content);
+
+        makeDraggable(titlebar, win);
+        win.addEventListener('mousedown', () => bringToFront(win));
+
+        return win;
+    }
+
+    function handleCalc(btn, display) {
+        if (btn === '=') {
+            try {
+                display.value = eval(display.value);
+            } catch {
+                display.value = 'Error';
+            }
+        } else if (btn === 'C') {
+            display.value = '';
+        } else {
+            display.value += btn;
+        }
+    }
+
+    function minimize(win) {
+        win.classList.add('minimized');
+    }
+
+    function maximize(win) {
+        win.classList.toggle('maximized');
+    }
+
+    function close(win) {
+        const app = win.dataset.app;
+        win.remove();
+        delete windows[app];
+        appIcons[app].remove();
+        delete appIcons[app];
+    }
+
+    function bringToFront(win) {
+        win.style.zIndex = zIndexCounter++;
+    }
+
+    function makeDraggable(titlebar, win) {
+        let offsetX, offsetY;
+        titlebar.addEventListener('mousedown', (e) => {
+            offsetX = e.clientX - win.getBoundingClientRect().left;
+            offsetY = e.clientY - win.getBoundingClientRect().top;
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        });
+
+        function drag(e) {
+            if (win.classList.contains('maximized')) return;
+            win.style.left = `${e.clientX - offsetX}px`;
+            win.style.top = `${e.clientY - offsetY}px`;
+        }
+
+        function stopDrag() {
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+    }
+});

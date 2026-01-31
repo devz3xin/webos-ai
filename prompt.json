@@ -1,0 +1,41 @@
+{
+  "role": "Esperto sviluppatore Frontend",
+  "task": "Crea una pagina web a schermo intero che simuli un Sistema Operativo Desktop moderno.",
+  "format": "File separato (HTML/CSS/JS) pronto all'uso",
+  "requirements": {
+    "interface_design": {
+      "desktop": "Sfondo elegante (URL Unsplash) con griglia di icone cliccabili.",
+      "taskbar": "Barra inferiore con pulsante Start, icone app aperte e orologio di sistema funzionante.",
+      "style": "Moderno con Glassmorphism (semi-trasparenza e backdrop-filter: blur)."
+    },
+    "window_manager": {
+      "features": [
+        "Trascinabili (draggable)",
+        "Controlli: Chiudi, Minimizza, Massimizza",
+        "Gestione z-index (focus al click)"
+      ],
+      "trigger": "Apertura tramite icone desktop o taskbar"
+    },
+    "apps": [
+      {
+        "name": "Notepad",
+        "functionality": "Finestra con textarea editabile"
+      },
+      {
+        "name": "Calcolatrice",
+        "functionality": "Utility per calcoli semplici"
+      },
+      {
+        "name": "File Explorer",
+        "functionality": "Visualizzazione a griglia di cartelle fittizie"
+      }
+    ],
+    "technical_constraints": {
+      "stack": "JavaScript Vanilla",
+      "comments": "Nessun commento all'interno del codice",
+      "branding": "Mantenere logo e sottotitolo originali",
+      "layout": "Responsive, 100% viewport, no scroll principale"
+    }
+  },
+  "output_expectation": "Codice completo e funzionante"
+}

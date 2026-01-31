@@ -1,0 +1,37 @@
+"Agisci come un esperto sviluppatore Frontend. Crea una pagina web a schermo intero che simuli un Sistema Operativo Desktop moderno. La pagina deve essere contenuta in un unico file (o separata in HTML/CSS/JS se preferisci, ma pronta all'uso) e deve includere le seguenti caratteristiche:
+
+1. Interfaccia e Design:
+
+Desktop: Uno sfondo elegante (usa un URL di Unsplash) con una griglia di icone cliccabili.
+
+Taskbar: Una barra inferiore con un pulsante 'Start', icone per le app aperte e un orologio di sistema funzionante a destra.
+
+Stile: Utilizza un design moderno con Glassmorphism (sfondi semi-trasparenti con backdrop-filter: blur).
+
+2. Sistema di Finestre (Window Manager):
+
+Le finestre devono essere trascinabili (draggable) e avere i controlli: Chiudi, Minimizza, Massimizza.
+
+Implementa la gestione dello z-index: la finestra cliccata deve passare in primo piano.
+
+Le finestre devono aprirsi cliccando sulle icone del desktop o della taskbar.
+
+3. Applicazioni Funzionanti (Esempi):
+
+Notepad: Una finestra con una textarea dove è possibile scrivere.
+
+Calcolatrice: Una semplice utility per eseguire calcoli.
+
+File Explorer: Una visualizzazione a griglia che mostra cartelle fittizie.
+
+4. Vincoli Tecnici:
+
+Usa JavaScript Vanilla (o specifica se preferisci React/Vue).
+
+Nessun commento all'interno del codice, né descrittivo né di spiegazione.
+
+Mantieni il logo e il sottotitolo originali del sistema (se presenti nel design).
+
+Il layout deve essere responsive e occupare il 100% del viewport (no scroll della pagina principale).
+
+Genera il codice completo e funzionante."

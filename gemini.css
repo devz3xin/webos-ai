@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#desktop {
+    width: 100vw;
+    height: 100vh;
+    background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    padding: 20px;
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 100px);
+    grid-template-rows: repeat(auto-fill, 100px);
+    gap: 15px;
+    height: calc(100% - 50px);
+}
+
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.desktop-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.icon-img {
+    font-size: 40px;
+    margin-bottom: 5px;
+}
+
+.desktop-icon span {
+    font-size: 12px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+#taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 9999;
+}
+
+#start-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+#active-apps {
+    flex-grow: 1;
+    display: flex;
+    gap: 5px;
+}
+
+#system-clock {
+    color: white;
+    font-size: 14px;
+    padding: 0 10px;
+}
+
+.window {
+    position: absolute;
+    min-width: 300px;
+    min-height: 200px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.window-header {
+    background: rgba(255, 255, 255, 0.4);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.window-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+}
+
+.window-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.close { background: #ff5f56; }
+.min { background: #ffbd2e; }
+.max { background: #27c93f; }
+
+.window-content {
+    flex-grow: 1;
+    padding: 10px;
+    overflow: auto;
+}
+
+textarea.notepad-area {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    outline: none;
+}
+
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
+.calc-screen {
+    grid-column: span 4;
+    background: white;
+    padding: 10px;
+    text-align: right;
+    margin-bottom: 5px;
+    border-radius: 4px;
+}
+
+.explorer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 70px);
+    gap: 10px;
+}
+
+.folder {
+    text-align: center;
+    font-size: 12px;
+}
