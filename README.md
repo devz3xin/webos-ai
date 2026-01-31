@@ -12,4 +12,6 @@ Perplexity: https://zexinstest1.vercel.app/perplexity.html
 
 Claude: https://zexinstest1.vercel.app/claude.html
 
+Prompt: https://zexinstest1.vercel.app/prompt.json
+
 se avete altre idee, aprite un issue :D
